@@ -13,19 +13,27 @@ if __name__ == "__main__":
     file_1 = "FILES/VENTE_PAR_CATEGORIE/category-sales-summary-2026-10-01-2026-10-01.xlsx"
 
     for file in FILES_DIR.iterdir() :
-        print(file)
-        print(file.name)
+        print("\n\t",file.stem[-10:],"\n")
+        data = pandas.read_excel(file)
+        list_service = []
+        for i in range(len(data)):
+            if i != 4 :
+                serv = Service(data["CatÃ©gorie"][i],data["Ventes brutes"][1])
+                list_service.append(serv)
+        
+        for service in list_service:
+            print(service)
 
     #data = pandas.read_excel(file_1)
-    data = pandas.read_excel(file_1, sheet_name="category-sales-summary-2026-10-", usecols="A, C")
+    # data = pandas.read_excel(file_1, sheet_name="category-sales-summary-2026-10-", usecols="A, C")
 
     #print(data)
 
-    list_service = []
-    for i in range(len(data)):
-        if i != 4 :
-            serv = Service(data["CatÃ©gorie"][i],data["Ventes brutes"][1])
-            list_service.append(serv)
+    #list_service = []
+    #for i in range(len(data)):
+    #    if i != 4 :
+    #        serv = Service(data["CatÃ©gorie"][i],data["Ventes brutes"][1])
+    #        list_service.append(serv)
 
-    for service in list_service:
-        print(service)
+    #for service in list_service:
+    #    print(service)
