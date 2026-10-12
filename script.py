@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     print(suivi_book.sheetnames)
 
-    nom_feuille = "SERVICE ANOSIBE SEPTEMBRE "
+    nom_feuille = "SERVICE RAVINALA OCTOBRE"
     
     ws = suivi_book[nom_feuille]
 
@@ -43,15 +43,19 @@ if __name__ == "__main__":
     row = first_row
     for file in FILES_DIR.iterdir() :
         
-        print("\n\t",file.stem[-10:],"\n")
+        #print("\n\t",file.stem[-10:],"\n")
+        print("\n\t",file.name,"\n")
         data = pandas.read_excel(file)
+        print(data)
         list_service = []
         for i in range(len(data)):
             if i != 4 :
-                serv = Service(data["CatÃ©gorie"][i],data["Ventes brutes"][1])
+                serv = Service(data["CatÃ©gorie"][i],data["Ventes brutes"][i])
+                print(serv)
                 list_service.append(serv)
         
         for service in list_service:
+            #print(service)
             if (service.getService() == "LAVAGE") :
                 ws.cell(row=row,column=lavage_col).value = service.getVente()
             elif (service.getService() == "VIDANGE") :
@@ -60,7 +64,7 @@ if __name__ == "__main__":
                 ws.cell(row=row,column=vulca_col).value = service.getVente()
             elif (service.getService() == "PARALLELISME & CARROSSAGE") :
                 ws.cell(row=row,column=parallelisme_col).value = service.getVente()
-            #print(service)
+            
         
         row += 1
 
