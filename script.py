@@ -34,7 +34,7 @@ if __name__ == "__main__":
     parallelisme_col = 12
 
     #ws["C4"] = 2000
-    ws.cell(row=4,column=3).value=5000
+    #ws.cell(row=4,column=3).value=5000
 
     #suivi_book.save(SUIVI_SERVICE_FILE)
 
