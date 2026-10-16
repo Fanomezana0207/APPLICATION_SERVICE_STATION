@@ -22,14 +22,22 @@ VIDANGE_COL = 6
 VULCA_COL = 9
 PARALLELISME_COL = 12
 
-def selectRowByDate (date, sheet) :
-    for i in range(4,sheet.max_row+1) :
+def selectRowByDate (date_recherche, sheet) :
+    for i in range(FIRST_ROW, sheet.max_row+1):
         d = sheet.cell(row = i, column = 1).value
-        d_en_str = d.strftime("%Y-%m-%d")
-        print(f"date = {date}\t sheet.date = {d_en_str}\t=> {sheet.cell(row = i, column = 2).value}")
-        if d_en_str == date:
+
+        if d is None :
+            continue
+
+        if (isinstance(d,(datetime.datetime,datetime.date))) :
+            d_en_str = d.strftime("%Y-%m-%d")
+        else :
+            d_en_str = str(d).strip()
+
+        if d_en_str == date_recherche :
             return i
-    return f"date {date} non trouvé"  
+    print(f"date {date_recherche} non trouvé")
+    return None
 
 def insertServiceToExcel(service, sheet, row) :
     if (service.getService() == "LAVAGE") :
@@ -41,21 +49,20 @@ def insertServiceToExcel(service, sheet, row) :
     elif (service.getService() == "PARALLELISME & CARROSSAGE") :
         sheet.cell(row=row,column=PARALLELISME_COL).value = service.getVente()
 
-def insertSalesCategories(dataFilePath, outputFilePath) :
-    dataFile = Path(dataFilePath.replace("\\","/"))
+def insertSalesCategories(dataFilePath, outputFilePath, sheetname = "") :
+    dataFile = Path(dataFilePath)
+    outputFile = Path(outputFilePath)
     data = pandas.read_csv(dataFile, encoding="utf-8-sig")
     data.columns = data.columns.str.strip() # Nettoyer les espaces éventuels
-    outputFile = Path(outputFilePath.replace("\\","/"))
 
     if not outputFile.exists() :
         raise FileNotFoundError(outputFile)
         
     suivi_book = openpyxl.load_workbook(outputFile)
-    print(suivi_book.sheetnames)
-    #print("veuiller COPIER-COLLER le nom de la feuille choisi !")
-
-    nom_feuille = input("veuiller COPIER-COLLER le nom de la feuille choisi : ")
-    ws = suivi_book[nom_feuille]
+    if not(sheetname in suivi_book.sheetnames) :
+        print(suivi_book.sheetnames)
+        sheetname = input("veuiller COPIER-COLLER le nom de la feuille choisi : ")
+    ws = suivi_book[sheetname]
 
     row = selectRowByDate(dataFile.stem[-10:],ws)
 
@@ -66,7 +73,51 @@ def insertSalesCategories(dataFilePath, outputFilePath) :
     suivi_book.save(outputFile)
     print("Modification enregisté")
 
+def insertAllSalesCategories(dataDirPath, outputFilePath) :
+    dataDirPath = Path(dataDirPath)
+    outputFile = Path(outputFilePath)
+    suivi_book = openpyxl.load_workbook(outputFile)
+    print(suivi_book.sheetnames)
+    sheetname = input("veuiller COPIER-COLLER le nom de la feuille choisi : ")
+    for file in dataDirPath.iterdir() :
+        if file.is_file() and file.suffix.lower() == ".csv" :
+            #dataFilePath = file.resolve()
+            #print(dataFilePath)
+            #print(type(dataFilePath))
+            insertSalesCategories(file, outputFile,sheetname)
 
-dataFileToInput = input("Le lien du fichier sale-categorie à importer : ").replace("\"","")
-dataFileOutput = input("Le lien du fichier Recap_service : ").replace("\"","")
-insertSalesCategories(dataFileToInput, dataFileOutput)
+def generateReceipts(dataFilePath) :
+    dataFilecsv = Path(dataFilePath)
+    dataFileExcel = dataFilecsv.parent.resolve().joinpath(dataFilecsv.stem+".xlsx")
+    data = pandas.read_csv(dataFilecsv, encoding="utf-8-sig")
+
+    colonnes = [
+        "Date",
+        "Numéro du reçu",
+        "Catégorie",
+        "Article",
+        "Ventes brutes",
+        "Magasin",
+        "Nom du client",
+        "Statut"
+    ]
+
+    data = data[colonnes].copy()
+    data["Ventes brutes"] = pandas.to_numeric(data["Ventes brutes"],errors="raise").astype("int64")
+    #for i in range(1, len(data+1)) :
+    #    if data["Nom du client"][i] != "" :
+    #        data["Nom du client"][i].upper()
+
+    data.to_excel(dataFileExcel, index=False)
+    print("fichier receipts recalculé")
+
+#dataFileToInput = input("Le lien du fichier sale-categorie à importer : ")
+#dataFileOutput = input("Le lien du fichier Recap_service : ")
+#insertSalesCategories(dataFileToInput, dataFileOutput)
+
+#fileDir = input("Le lien du dossier où se trouve les fichiers : ").strip().strip("\"")
+#dataFileOutput = input("Le lien du fichier Recap_service : ").strip().strip("\"")
+#insertAllSalesCategories(fileDir, dataFileOutput)
+
+dataFilePath = input("Le lien du fichier receipts à importer : ").strip().strip("\"")
+generateReceipts(dataFilePath)
