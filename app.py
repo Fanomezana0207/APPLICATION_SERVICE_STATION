@@ -64,13 +64,15 @@ def insertSalesCategories(dataFilePath, outputFilePath, sheetname = "") :
         sheetname = input("veuiller COPIER-COLLER le nom de la feuille choisi : ")
     ws = suivi_book[sheetname]
 
-    row = selectRowByDate(dataFile.stem[-10:],ws)
+    date_receipts = dataFile.stem[-10:]
+    row = selectRowByDate(date_receipts,ws)
 
     for i in range(len(data)):
         serv = Service(data["Catégorie"][i],data["Ventes brutes"][i])
         insertServiceToExcel(serv, ws, row=row)
 
     suivi_book.save(outputFile)
+    print(f"insertion des ventes par catégorie du {date_receipts}")
     print("Modification enregisté")
 
 def insertAllSalesCategories(dataDirPath, outputFilePath) :
@@ -119,5 +121,5 @@ def generateReceipts(dataFilePath) :
 #dataFileOutput = input("Le lien du fichier Recap_service : ").strip().strip("\"")
 #insertAllSalesCategories(fileDir, dataFileOutput)
 
-dataFilePath = input("Le lien du fichier receipts à importer : ").strip().strip("\"")
-generateReceipts(dataFilePath)
+#dataFilePath = input("Le lien du fichier receipts à importer : ").strip().strip("\"")
+#generateReceipts(dataFilePath)
