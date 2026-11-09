@@ -113,6 +113,11 @@ def generateReceipts(dataFilePath) :
     data.to_excel(dataFileExcel, index=False)
     print("fichier receipts recalculé")
 
+
+def generateReceiptsLavage(dataFilePath) :
+    pass
+
+
 #dataFileToInput = input("Le lien du fichier sale-categorie à importer : ")
 #dataFileOutput = input("Le lien du fichier Recap_service : ")
 #insertSalesCategories(dataFileToInput, dataFileOutput)
